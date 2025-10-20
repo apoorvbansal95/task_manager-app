@@ -1,14 +1,16 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../../components/Navbar/Navbar'
 import NoteCard from '../../components/Cards/NoteCard'
 import {MdAdd} from "react-icons/md"
 import AddEditNotes from './AddEditNotes'
 import Modal from 'react-modal'
+import { useNavigate } from 'react-router-dom'
+import axiosInstance from '../../utils/axiosInstance'
 export default function Home() {
-  const[openAddEditModal , setOpenAddEditModal]= useState({
-    isShown : false, 
-    type:"add", 
-    data:null
+  const [openAddEditModal, setOpenAddEditModal] = useState({
+    isShown: false,
+    type: "add",
+    data: null
   })
 
   const onClose = () => {        // for closing the modal using x button
@@ -18,9 +20,39 @@ export default function Home() {
       data: null
     })
   }
+
+  const [userInfo, setUserInfo] = useState(null);
+  const navigate = useNavigate()
+
+  //*******//
+  //Get user info
+  const getUserInfo = async () => {
+    try {
+      const response = await axiosInstance.get("/get-user")
+      if (response.data && response.data.user) {
+        setUserInfo(response.data.user)
+      }
+
+
+    } catch (err) {
+      if (err.response.status === 401) {
+        localStorage.clear()
+        navigate("/login")
+      }
+    }
+  }
+
+  useEffect(()=>{
+    getUserInfo()
+    return ()=>{
+
+    }
+  }, [])
+
+  // console.log(userInfo)
   return (
     <>
-      <Navbar/>
+      <Navbar userInfo={userInfo}/>
 
       <div className='container mx-auto'>
         <div className='grid grid-cols-3 gap-4 mt-8 '>
