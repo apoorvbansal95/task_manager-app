@@ -1,15 +1,33 @@
 import React, { useState } from 'react'
 import TagInputs from '../../components/input/TagInputs'
 import {MdAdd, MdClose} from 'react-icons/md'
-export default function AddEditNotes({noteData, type, onClose}) {
+import axiosInstance from '../../utils/axiosInstance'
+
+export default function AddEditNotes({noteData, type, onClose, getAllNotes}) {
   const [title, setTitle]= useState("")
   const [content, setContent]=useState("")
   const [tags, setTags]=useState([])
   const [error, setError]= useState(null)
 
   //add note 
-  const addNewNote=async ()=>{
-
+  const addNewNote = async () => {
+    try {
+      const response = await axiosInstance.post("/add-note", {
+        title,
+        content,
+        tags
+      });
+      if(response.data && response.data.note) {
+        getAllNotes();
+        onClose();
+      }
+    } catch(err) {
+      if(err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Failed to add note. Please try again.");
+      }
+    }
   }
 
   //Edit note

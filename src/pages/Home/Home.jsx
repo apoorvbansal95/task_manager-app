@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../../components/Navbar/Navbar'
 import NoteCard from '../../components/Cards/NoteCard'
 import {MdAdd} from "react-icons/md"
+import moment from "moment"
 import AddEditNotes from './AddEditNotes'
 import Modal from 'react-modal'
 import { useNavigate } from 'react-router-dom'
@@ -21,6 +22,7 @@ export default function Home() {
     })
   }
 
+  const [ allNotes, setAllNotes]= useState([])
   const [userInfo, setUserInfo] = useState(null);
   const navigate = useNavigate()
 
@@ -43,26 +45,50 @@ export default function Home() {
   }
 
   useEffect(()=>{
+    getAllNotes()
     getUserInfo()
     return ()=>{
 
     }
   }, [])
 
-  // console.log(userInfo)
+
+
+  //Get all notes 
+  const getAllNotes=async()=>{
+    try{
+      const response= await axiosInstance.get("/get-all-notes")
+      if (response.data && response.data.allNotes){
+        setAllNotes(response.data.allNotes)
+      }
+
+    }catch(err){
+      console.log("An unexpected error occur")
+    }
+  }
+
+
+
   return (
     <>
       <Navbar userInfo={userInfo}/>
 
       <div className='container mx-auto'>
         <div className='grid grid-cols-3 gap-4 mt-8 '>
-        <NoteCard title="Meeting at 7pm" date="3rd April 2025" content="Meeting at 7pm in Delhi"
-        tags="#meeting"
-        isPinned={true}
-        onEdit={()=>{}}
-        onDelete={()=>{}}
-        onPinNote={()=>{}}
-        />
+          {allNotes.map((item, index) => (
+            <NoteCard
+              key={item._id}
+              title={item.title}
+              date={moment(item.createdOn).format('Do MMM YYYY')}
+              content={item.content}
+              tags={item.tags}
+              isPinned={item.isPinned}
+              onEdit={() => { }}
+              onDelete={() => { }}
+              onPinNote={() => { }}
+            />
+          ))}
+        
         </div>
       </div>
 
@@ -83,7 +109,7 @@ export default function Home() {
         style={{ overlay: { backgroundColor: "rgba(0, 0, 0,0.2)" } }}
         contentLabel=""
         className=" w-[40%] max-h-3/4 bg-white rounded-md mx-auto mt-14 p-5 ">
-        <AddEditNotes  type={openAddEditModal.type} noteData={openAddEditModal.data}  onClose={onClose}/>
+        <AddEditNotes  type={openAddEditModal.type} noteData={openAddEditModal.data}  onClose={onClose} getAllNotes={getAllNotes}/>
       </Modal>
 
 

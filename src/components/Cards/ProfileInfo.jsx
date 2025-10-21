@@ -2,9 +2,7 @@ import React from 'react'
 import { getInitials } from '../../utils/helper'
 
 export default function ProfileInfo({ onLogout, userInfo}) {
-  console.log("Profile page")
-  console.log(userInfo)
-  // console.log(userInfo.fullname)
+
   return (
     <div  className=' flex items-center gap-3'>
         <div className='w-12 h-12 flex items-center justify-center text-slate-950 bg-slate-100'> 
