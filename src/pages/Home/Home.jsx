@@ -7,6 +7,7 @@ import AddEditNotes from './AddEditNotes'
 import Modal from 'react-modal'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../utils/axiosInstance'
+import Toast from '../../components/ToastMessage/Toast'
 export default function Home() {
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
@@ -22,9 +23,40 @@ export default function Home() {
     })
   }
 
+  const [showToastMsg, setShowToastMsg]= useState({
+    isShown:false, 
+    type:"add", 
+    data:null
+  })
+
   const [ allNotes, setAllNotes]= useState([])
   const [userInfo, setUserInfo] = useState(null);
   const navigate = useNavigate()
+//*****************************************/
+// HandleEdit
+const handleEdit=async(noteDetails)=>{
+setOpenAddEditModal({isShown:true, data:noteDetails, type:"edit"})
+}
+
+
+//***********************************************/
+//handle close toast
+const handleCloseToast=()=>{
+  setShowToastMsg({
+    isShown:false, 
+    message:""
+  })
+}
+
+
+//*******************************************/
+const showToastMessage=(message, type)=>{
+setShowToastMsg({
+  isShown:true, 
+  message, 
+  type
+})
+}
 
   //*******//
   //Get user info
@@ -43,6 +75,10 @@ export default function Home() {
       }
     }
   }
+
+
+
+
 
   useEffect(()=>{
     getAllNotes()
@@ -83,7 +119,7 @@ export default function Home() {
               content={item.content}
               tags={item.tags}
               isPinned={item.isPinned}
-              onEdit={() => { }}
+              onEdit={() => handleEdit(item)}
               onDelete={() => { }}
               onPinNote={() => { }}
             />
@@ -112,6 +148,12 @@ export default function Home() {
         <AddEditNotes  type={openAddEditModal.type} noteData={openAddEditModal.data}  onClose={onClose} getAllNotes={getAllNotes}/>
       </Modal>
 
+        <Toast
+        isShown={showToastMsg.isShown}
+        message={showToastMsg.message}
+        type={showToastMsg.type}
+        onClose={handleCloseToast}
+        />
 
         </>
   )

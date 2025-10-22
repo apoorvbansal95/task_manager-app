@@ -4,9 +4,9 @@ import {MdAdd, MdClose} from 'react-icons/md'
 import axiosInstance from '../../utils/axiosInstance'
 
 export default function AddEditNotes({noteData, type, onClose, getAllNotes}) {
-  const [title, setTitle]= useState("")
-  const [content, setContent]=useState("")
-  const [tags, setTags]=useState([])
+  const [title, setTitle]= useState(noteData?.title ||"")
+  const [content, setContent]=useState(noteData?.content ||"")
+  const [tags, setTags]=useState(noteData?.tags||[])
   const [error, setError]= useState(null)
 
   //add note 
@@ -31,27 +31,48 @@ export default function AddEditNotes({noteData, type, onClose, getAllNotes}) {
   }
 
   //Edit note
-  const editNote= async()=>{
-
-}
-  const handleAddNote=()=>{    // to add newly created task
-    if (!title){
-      setError("Please add Title")
-      return 
+  const editNote = async () => {
+    const noteId = noteData._id
+    try {
+      const response = await axiosInstance.put("/edit-note/" + noteId, {
+        title,
+        content,
+        tags
+      });
+      if (response.data && response.data.note) {
+        getAllNotes();
+        onClose();
+      }
+    } catch (err) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Failed to add note. Please try again.");
+      }
     }
-    if (!content){
+  }
+
+
+  const handleAddNote = () => {    // to add newly created task
+    if (!title) {
+      setError("Please add Title")
+      return
+    }
+    if (!content) {
       setError("Please add the description")
-      return 
+      return
     }
 
     setError("")
-    if (type==="edit"){
+    if (type === "edit") {
       editNote()
     }
-    else{
+    else {
       addNewNote()
     }
   }
+
+
   return (
     <div className='relative'>
         <button className='w-10 h-10 flex items-center justify-center absolute -top-3 -right-3 hover:bg-slate-500' onClick={onClose}>
@@ -86,7 +107,7 @@ export default function AddEditNotes({noteData, type, onClose, getAllNotes}) {
 
       {error && <p className='text-red-500 text-xs'>{error} </p>}
       <button className='btn-primary font-medium mt-5 p-3' onClick={handleAddNote}>
-        Add
+        {type==="edit"?'UPDATE':'Add'}
       </button>
     </div>
   )
