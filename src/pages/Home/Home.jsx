@@ -8,7 +8,11 @@ import Modal from 'react-modal'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../utils/axiosInstance'
 import Toast from '../../components/ToastMessage/Toast'
+import EmptyCard from '../../components/EmptyCard/EmptyCard'
+
 export default function Home() {
+
+
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
     type: "add",
@@ -26,7 +30,7 @@ export default function Home() {
   const [showToastMsg, setShowToastMsg]= useState({
     isShown:false, 
     type:"add", 
-    data:null
+    message:null
   })
 
   const [ allNotes, setAllNotes]= useState([])
@@ -103,6 +107,24 @@ setShowToastMsg({
     }
   }
 
+//Delete task
+const deleteNote=async(noteData)=>{
+  const noteId = noteData._id
+   try {
+      const response = await axiosInstance.delete("/delete-note/" + noteId);
+      if (response.data && !response.data.error) {
+        showToastMessage("Note deleted successfully")
+        getAllNotes();
+      }
+    } catch (err) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        console.log("An unexpected error occur")
+      }
+    }
+}
+
 
 
   return (
@@ -110,7 +132,7 @@ setShowToastMsg({
       <Navbar userInfo={userInfo}/>
 
       <div className='container mx-auto'>
-        <div className='grid grid-cols-3 gap-4 mt-8 '>
+       {allNotes.length>0? <div className='grid grid-cols-3 gap-4 mt-8 '>
           {allNotes.map((item, index) => (
             <NoteCard
               key={item._id}
@@ -120,12 +142,12 @@ setShowToastMsg({
               tags={item.tags}
               isPinned={item.isPinned}
               onEdit={() => handleEdit(item)}
-              onDelete={() => { }}
+              onDelete={() => deleteNote(item)}
               onPinNote={() => { }}
             />
           ))}
         
-        </div>
+        </div>:<EmptyCard/>}
       </div>
 
       <button className='w-16 h-16 flex items-center justify-center bg-blue-300 hover:bg-blue-600 absolute right-10 bottom-10' 
@@ -145,7 +167,7 @@ setShowToastMsg({
         style={{ overlay: { backgroundColor: "rgba(0, 0, 0,0.2)" } }}
         contentLabel=""
         className=" w-[40%] max-h-3/4 bg-white rounded-md mx-auto mt-14 p-5 ">
-        <AddEditNotes  type={openAddEditModal.type} noteData={openAddEditModal.data}  onClose={onClose} getAllNotes={getAllNotes}/>
+        <AddEditNotes  type={openAddEditModal.type} noteData={openAddEditModal.data}  onClose={onClose} getAllNotes={getAllNotes} showToastMessage={showToastMessage}/>
       </Modal>
 
         <Toast
